@@ -1,0 +1,156 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+Reduces usage of static initialization. This crashes on my computer, perhaps
+because I build with C++17 on Clang?
+
+diff --git src/UtilityPKG/N_UTL_LogStream.C src/UtilityPKG/N_UTL_LogStream.C
+index 794e06a..8da9d41 100644
+--- src/UtilityPKG/N_UTL_LogStream.C
++++ src/UtilityPKG/N_UTL_LogStream.C
+@@ -112,8 +112,9 @@
+ // NEVER, leave this out!
+ #include <Xyce_config.h>
+ 
+-#include <iostream>
+ #include <fstream>
++#include <iostream>
++#include <memory>
+ #include <sstream>
+ #include <stdexcept>
+ 
+@@ -137,14 +138,14 @@ namespace {
+ int                             s_rank = 0;                                     ///< Processor rank
+ int                             s_size = 1;                                     ///< Number of processors
+ Util::tee_streambuf             s_loutStreambuf;                                ///< Tee'd stream buffer for logging output
+-Util::indent_streambuf          s_doutStreambuf(std::cout.rdbuf());             ///< Indentation stream buffer for diagnostic output
++Util::indent_streambuf *        s_doutStreambuf;                                ///< Indentation stream buffer for diagnostic output
+ Util::tee_streambuf             s_poutStreambuf;                                ///< Processor zero forwarder
+ std::ofstream *                 s_logFileStream;                                ///< Log file output stream
+ std::ofstream *                 s_diagnosticFileStream;                         ///< Diagnostic log file output stream
+ 
+-std::ostream                    s_lout(std::cout.rdbuf());                      ///< Logging output stream
+-std::ostream                    s_dout(std::cout.rdbuf());                      ///< Diagnostic output stream
+-std::ostream                    s_pout(std::cout.rdbuf());                      ///< Processor zero forwarded output stream
++std::ostream *                  s_lout;                                         ///< Logging output stream
++std::ostream *                  s_dout;                                         ///< Diagnostic output stream
++std::ostream *                  s_pout;                                         ///< Processor zero forwarded output stream
+ std::ostringstream              s_poutBacklog;                                  ///< Stream holding messages to be forwarded
+ 
+ const char *section_divider  = "------------------------------------------------------------";
+@@ -195,13 +196,18 @@ struct INIT
+    */
+   INIT()
+   {
++    s_doutStreambuf = new Util::indent_streambuf(std::cout.rdbuf());
++    s_lout = new std::ostream(std::cout.rdbuf());
++    s_dout = new std::ostream(std::cout.rdbuf());
++    s_pout = new std::ostream(std::cout.rdbuf());
++
+     s_loutStreambuf.add(&std::cout);
+-    s_doutStreambuf.redirect(&s_loutStreambuf);
+-    s_poutStreambuf.add(&s_lout);
++    s_doutStreambuf->redirect(&s_loutStreambuf);
++    s_poutStreambuf.add(s_lout);
+ 
+-    s_lout.rdbuf(&s_loutStreambuf);
+-    s_dout.rdbuf(&s_doutStreambuf);
+-    s_pout.rdbuf(&s_poutStreambuf);
++    s_lout->rdbuf(&s_loutStreambuf);
++    s_dout->rdbuf(s_doutStreambuf);
++    s_pout->rdbuf(&s_poutStreambuf);
+   }
+ 
+   /**
+@@ -214,24 +220,29 @@ struct INIT
+    */
+   ~INIT()
+   {
+-    s_dout.flush();
+-    s_pout.flush();
+-    s_lout.flush();
++    s_dout->flush();
++    s_pout->flush();
++    s_lout->flush();
+ 
+     s_loutStreambuf.clear();
+     s_poutStreambuf.clear();
+ 
+     delete s_logFileStream;
+ 
+-    s_lout.rdbuf(std::cout.rdbuf());
+-    s_dout.rdbuf(std::cout.rdbuf());
+-    s_pout.rdbuf(std::cout.rdbuf());
++    s_lout->rdbuf(std::cout.rdbuf());
++    s_dout->rdbuf(std::cout.rdbuf());
++    s_pout->rdbuf(std::cout.rdbuf());
+ 
+     s_logFileStream = 0;
+ 
+     delete s_threadLoutMutex;
+ 
+     s_threadLoutMutex = 0;
++
++    delete s_pout;
++    delete s_dout;
++    delete s_lout;
++    delete s_doutStreambuf;
+   }
+ };
+ 
+@@ -302,7 +313,7 @@ std::ostream &lout()
+       return *(*it).second;
+   }
+ 
+-  return s_lout;
++  return *s_lout;
+ }
+ 
+ /**
+@@ -317,7 +328,7 @@ std::ostream &dout()
+ {
+   init();
+ 
+-  return s_dout;
++  return *s_dout;
+ }
+ 
+ /**
+@@ -332,7 +343,7 @@ std::ostream &pout()
+ {
+   init();
+ 
+-  return s_pout;
++  return *s_pout;
+ }
+ 
+ /**
+@@ -435,7 +446,7 @@ bool openDiagnosticFile(const std::string &path, bool per_processor)
+   if (ofs)
+   {
+     s_diagnosticFileStream = ofs;
+-    s_doutStreambuf.redirect(s_diagnosticFileStream->rdbuf());
++    s_doutStreambuf->redirect(s_diagnosticFileStream->rdbuf());
+     s_loutStreambuf.add(s_diagnosticFileStream);
+   }
+ 
+@@ -465,7 +476,7 @@ void closeLogFile()
+     delete s_diagnosticFileStream;
+ 
+     s_diagnosticFileStream = 0;
+-    s_doutStreambuf.redirect(&s_loutStreambuf);
++    s_doutStreambuf->redirect(&s_loutStreambuf);
+   }
+ 
+   delete s_logFileStream;

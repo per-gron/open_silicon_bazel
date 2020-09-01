@@ -1,0 +1,66 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+This patch makes CBAG compile on Clang and fixes a bug where operator<= is used
+instead of operator< for a comparator functor. This ought to be upstreamed.
+
+diff --git include/cbag/util/sorted_map.h include/cbag/util/sorted_map.h
+index 8d41ae6..6b8ef4d 100644
+--- include/cbag/util/sorted_map.h
++++ include/cbag/util/sorted_map.h
+@@ -60,10 +60,10 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
+     using key_type = Key;
+     using mapped_type = T;
+     using value_type = std::pair<key_type, mapped_type>;
++    using key_compare = Compare;
+     using vector_type = sorted_vector<value_type, value_compare>;
+     using size_type = typename vector_type::size_type;
+     using difference_type = typename vector_type::difference_type;
+-    using key_compare = Compare;
+     using reference = value_type &;
+     using const_reference = const value_type &;
+     using iterator = typename vector_type::iterator;
+
+diff --git include/cbag/util/sorted_vector.h include/cbag/util/sorted_vector.h
+index 9708c87..29d2943 100644
+--- include/cbag/util/sorted_vector.h
++++ include/cbag/util/sorted_vector.h
+@@ -156,7 +156,12 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
+     template <class K> const_iterator find_exact(const K &x) const {
+         auto iter = lower_bound(x);
+         auto end = data_.end();
+-        return (iter != end && *iter == x) ? iter : end;
++        auto equals_with_comp = [&](const auto& a, const auto& b) {
++          // Instead of assuming that there is an operator== for the two values,
++          // use the provided comparator function.
++          return !comp_(a, b) && !comp_(b, a);
++        };
++        return (iter != end && equals_with_comp(*iter, x)) ? iter : end;
+     }
+ 
+     void clear() noexcept { data_.clear(); }
+
+diff --git include/cbag/util/interval.h include/cbag/util/interval.h
+index 0c74aa0..0755380 100644
+--- include/cbag/util/interval.h
++++ include/cbag/util/interval.h
+@@ -123,7 +123,7 @@ struct intv_comp {
+     using is_transparent = void;
+ 
+     template <typename T1, typename T2> bool operator()(const T1 &lhs, const T2 &rhs) const {
+-        return traits::interval<T1>::stop(lhs) <= traits::interval<T2>::start(rhs);
++        return traits::interval<T1>::stop(lhs) < traits::interval<T2>::start(rhs);
+     }
+ };
+ 

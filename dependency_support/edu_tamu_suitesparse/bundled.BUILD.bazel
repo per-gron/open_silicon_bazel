@@ -1,0 +1,113 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["restricted"])
+
+cc_library(
+    name = "suitesparseconfig",
+    srcs = ["SuiteSparse_config/SuiteSparse_config.c"],
+    hdrs = ["SuiteSparse_config/SuiteSparse_config.h"],
+    linkopts = ["-lrt"],
+)
+
+AMD_srcs = [
+    "AMD/Source/amd_1.c",
+    "AMD/Source/amd_2.c",
+    "AMD/Source/amd_aat.c",
+    "AMD/Source/amd_control.c",
+    "AMD/Source/amd_defaults.c",
+    "AMD/Source/amd_dump.c",
+    "AMD/Source/amd_info.c",
+    "AMD/Source/amd_order.c",
+    "AMD/Source/amd_post_tree.c",
+    "AMD/Source/amd_postorder.c",
+    "AMD/Source/amd_preprocess.c",
+    "AMD/Source/amd_valid.c",
+]
+
+# Parts of the library shared between the integer and long integer versions.
+cc_library(
+    name = "amd_common",
+    srcs = ["AMD/Source/amd_global.c"],
+)
+
+# Integer version of the AMD library.
+cc_library(
+    name = "amd_int",
+    srcs = AMD_srcs,
+    hdrs = [
+        "AMD/Include/amd.h",
+        "AMD/Include/amd_internal.h",
+    ],
+    copts = [
+        "-w",
+        "-fexceptions",
+        "-DDINT",
+    ],
+    includes = [
+        "AMD/Include",
+        "SuiteSparse_config",
+    ],
+    linkopts = ["-lm"],
+    deps = [
+        ":amd_common",
+        ":suitesparseconfig",
+    ],
+)
+
+# long integer version of the AMD library
+cc_library(
+    name = "amd_long",  # version 2.2.0
+    srcs = AMD_srcs,
+    hdrs = [
+        "AMD/Include/amd.h",
+        "AMD/Include/amd_internal.h",
+    ],
+    copts = [
+        "-w",
+        "-fexceptions",
+        "-DDLONG",
+    ],
+    includes = [
+        "AMD/Include",
+        "SuiteSparse_config",
+    ],
+    linkopts = ["-lm"],
+    deps = [
+        ":amd_common",
+        ":suitesparseconfig",
+    ],
+)
+
+# AMD
+# To use this library from a C++ program:
+#   extern "C" {
+#   #include "AMD/Include/amd.h"
+#   }
+cc_library(
+    name = "amd",
+    deps = [
+        ":amd_int",
+        ":amd_long",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "amd_demo",
+    srcs = ["AMD/Demo/amd_demo.c"],
+    deps = [":amd"],
+)

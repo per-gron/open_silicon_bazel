@@ -1,0 +1,30 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+This patch makes pybind11_generics compile with Clang/libc++. This ought to be
+upstreamed.
+
+diff --git include/pybind11_generics/union.h include/pybind11_generics/union.h
+index 9351e6a..c00eecd 100644
+--- include/pybind11_generics/union.h
++++ include/pybind11_generics/union.h
+@@ -76,7 +76,7 @@ template <typename... T> class Union : public union_base {
+ 
+     template <std::size_t I> std::variant_alternative_t<I, std::variant<T...>> get() {
+         if (I != index())
+-            throw std::bad_variant_access("Accessing invalid value in union.");
++            throw std::bad_variant_access();
+         return cast_from_handle<std::variant_alternative_t<I, std::variant<T...>>>(
+             py::handle(ptr()));
+     }

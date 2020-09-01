@@ -1,0 +1,78 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+std::mem_fun and std::random_shuffle were removed in C++17.
+
+diff --git src/TopoManagerPKG/N_TOP_ParLSUtil.C src/TopoManagerPKG/N_TOP_ParLSUtil.C
+index b1dc662..d10f961 100644
+--- src/TopoManagerPKG/N_TOP_ParLSUtil.C
++++ src/TopoManagerPKG/N_TOP_ParLSUtil.C
+@@ -39,6 +39,7 @@
+ 
+ #include <iostream>
+ #include <numeric>
++#include <random>
+ #include <iterator>
+ 
+ #include <N_ERH_ErrorMgr.h>
+@@ -380,7 +381,9 @@ bool ParLSUtil::setupRowCol()
+       }
+       else
+       {
+-        random_shuffle( intVec.begin(), intVec.end() );
++        std::random_device rng;
++        std::mt19937 urng( rng() );
++        std::shuffle( intVec.begin(), intVec.end(), urng );
+         inode->pid = *(intVec.begin());
+       }
+     }
+diff --git src/IOInterfacePKG/Output/N_IO_MeasureManager.C src/IOInterfacePKG/Output/N_IO_MeasureManager.C
+index 29327dd..93ae14c 100644
+--- src/IOInterfacePKG/Output/N_IO_MeasureManager.C
++++ src/IOInterfacePKG/Output/N_IO_MeasureManager.C
+@@ -30,6 +30,7 @@
+ 
+ #include <Xyce_config.h>
+ 
++#include <functional>
+ #include <utility>
+ #include <sstream>
+ 
+@@ -424,7 +425,7 @@ void Manager::updateTranMeasures(
+   {
+     (*it)->updateTran(comm, circuitTime, solnVec, stateVec, storeVec, lead_current_vector, junction_voltage_vector, lead_current_dqdt_vector);
+   }
+-  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fun(&Measure::Base::finishedCalculation)),
++  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fn(&Measure::Base::finishedCalculation)),
+                             activeMeasuresList_.end());
+ }
+ 
+@@ -452,7 +453,7 @@ void Manager::updateDCMeasures(
+   {
+     (*it)->updateDC(comm, dcParamsVec, solnVec, stateVec, storeVec, lead_current_vector, junction_voltage_vector, lead_current_dqdt_vector);
+   }
+-  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fun(&Measure::Base::finishedCalculation)),
++  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fn(&Measure::Base::finishedCalculation)),
+                             activeMeasuresList_.end());
+ }
+ 
+@@ -476,7 +477,7 @@ void Manager::updateACMeasures(
+   {
+     (*it)->updateAC(comm, frequency, real_solution_vector, imaginary_solution_vector, RFparams);
+   }
+-  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fun(&Measure::Base::finishedCalculation)),
++  activeMeasuresList_.erase(std::remove_if(activeMeasuresList_.begin(), activeMeasuresList_.end(), std::mem_fn(&Measure::Base::finishedCalculation)),
+                             activeMeasuresList_.end()); }
+ 
+ //-----------------------------------------------------------------------------

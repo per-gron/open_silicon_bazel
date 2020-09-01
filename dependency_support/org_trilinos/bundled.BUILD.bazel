@@ -1,0 +1,1144 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+licenses(["restricted"])
+
+load("@com_google_open_silicon_bazel//dependency_support:cmake_substitution.bzl", "cmake_substitution")
+
+COPTS = [
+    "-w",
+    "-DNDEBUG",
+]
+
+F77_BLAS_MANGLE = "(name,NAME) name ## _"
+
+genrule(
+    name = "trilinos_version_h",
+    outs = ["Trilinos_version.h"],
+    cmd = "cat > $@",
+)
+
+cc_library(
+    name = "trilinos_version",
+    hdrs = ["Trilinos_version.h"],
+    defines = [
+        "TRILINOS_VERSION_STRING=\"\"",
+    ],
+)
+
+cmake_substitution(
+    name = "aztecoo_config_h",
+    src = "packages/aztecoo/cmake/AztecOO_config.h.in",
+    out = "packages/aztecoo/src/AztecOO_config.h",
+    substitutions = {
+        "AZ_ENABLE_TIMEMONITOR": 1,
+        "HAVE_ASSERT_H": 1,
+        "HAVE_AZTECOO_EPETRAEXT": 1,
+        "HAVE_AZTECOO_IFPACK": 1,
+        "HAVE_AZTECOO_TEUCHOS": 1,
+        "HAVE_BLAS": 1,
+        "HAVE_BOOL": 1,
+        "HAVE_CFLOAT": 1,
+        "HAVE_CTIME": 1,
+        "HAVE_EXAMPLES": 1,
+        "HAVE_EXPORT_MAKEFILES": 1,
+        "HAVE_FLOAT_H": 1,
+        "HAVE_FLOOR": 1,
+        "HAVE_LAPACK": 1,
+        "HAVE_LIBCHECK": 1,
+        "HAVE_MALLOC": 1,
+        "HAVE_MATH_H": 1,
+        "HAVE_MEMORY_H": 1,
+        "HAVE_MUTABLE": 1,
+        "HAVE_NAMESPACES": 1,
+        "HAVE_NEW_FOR_SCOPING": 1,
+        "HAVE_POW": 1,
+        "HAVE_SQRT": 1,
+        "HAVE_STDIO_H": 1,
+        "HAVE_STDLIB_H": 1,
+        "HAVE_STD_SPRINTF": 1,
+        "HAVE_STL": 1,
+        "HAVE_STRCHR": 1,
+        "HAVE_STRING": 1,
+        "HAVE_STRINGS_H": 1,
+        "HAVE_STRING_H": 1,
+        "HAVE_SYS_TIME_H": 1,
+        "HAVE_UNAME": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "F77_BLAS_MANGLE": F77_BLAS_MANGLE,
+        "F77_FUNC": F77_BLAS_MANGLE,
+        "IFPACK_DEPRECATED_DECLARATIONS": "",
+    },
+)
+
+cc_library(
+    name = "aztecoo",
+    srcs = glob([
+        "packages/aztecoo/src/*.c",
+        "packages/aztecoo/src/*.cpp",
+    ], exclude = [
+        "packages/aztecoo/src/md_wrap_mpi_c.c",
+        "packages/aztecoo/src/md_timer_mpi.c",
+        "packages/aztecoo/src/az_comm_intel.c",
+        "packages/aztecoo/src/az_comm_.*",
+        "packages/aztecoo/src/md_timer_intel.c",
+        "packages/aztecoo/src/md_timer_ncube.c",
+        "packages/aztecoo/src/md_timer_sol.c",
+        "packages/aztecoo/src/md_timer_sp2.c",
+        "packages/aztecoo/src/md_timer_sun.c",
+        "packages/aztecoo/src/md_timer_win2000.c",
+        "packages/aztecoo/src/md_wrap_intel_c.c",
+        "packages/aztecoo/src/md_wrap_ncube_c.c",
+        "packages/aztecoo/src/md_wrap_puma_c.c",
+        "packages/aztecoo/src/md_wrap_sp2_c.c",
+    ]),
+    hdrs = glob([
+        "packages/aztecoo/src/*.h",
+        "packages/aztecoo/src/*.hpp",
+    ]) + [
+        "packages/aztecoo/src/AztecOO_config.h",
+    ],
+    deps = [
+        ":epetra",
+        ":trilinos_version",
+        "@com_google_open_silicon_bazel//dependency_support/lapack:blas",
+    ],
+    includes = ["packages/aztecoo/src"],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+)
+
+cmake_substitution(
+    name = "amesos_config_h",
+    src = "packages/amesos/cmake/Amesos_config.h.in",
+    out = "packages/amesos/src/Amesos_config.h",
+    substitutions = {
+        "HAVE_AMESOS_KLU": 1,
+        "HAVE_AMESOS_LAPACK": 1,
+        "HAVE_SYS_UTSNAME_H": 1,
+        "HAVE_TIME_H": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+)
+
+cc_library(
+    name = "amesos",
+    srcs = glob([
+        "packages/amesos/src/*.cpp",
+    ], exclude = [
+        "packages/amesos/src/Amesos_Dscpack.cpp",
+        "packages/amesos/src/Amesos_MC64.cpp",
+        "packages/amesos/src/Amesos_Mumps.cpp",
+        "packages/amesos/src/Amesos_Paraklete.cpp",
+        "packages/amesos/src/Amesos_Pardiso.cpp",
+        "packages/amesos/src/Amesos_Scalapack.cpp",
+        "packages/amesos/src/Amesos_Superlu.cpp",
+        "packages/amesos/src/Amesos_Superludist.cpp",
+        "packages/amesos/src/Amesos_Taucs.cpp",
+        "packages/amesos/src/Amesos_Umfpack.cpp",
+    ]),
+    hdrs = glob([
+        "packages/amesos/src/*.h",
+        "packages/amesos/src/*.hpp",
+    ]) + [
+        "packages/amesos/src/Amesos_config.h",
+    ],
+    includes = [
+        "packages/amesos/src",
+    ],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+        ":suitesparse",
+    ],
+)
+
+cmake_substitution(
+    name = "belos_config_h",
+    src = "packages/belos/cmake/Belos_config.h.in",
+    out = "packages/belos/src/Belos_config.h",
+    substitutions = {
+        "HAVE_BELOS_AMESOS": 1,
+        "HAVE_BELOS_EPETRA": 1,
+        "HAVE_BELOS_EPETRAEXT": 1,
+        "HAVE_BELOS_TRIUTILS": 1,
+        "HAVE_MUTABLE": 1,
+        "HAVE_NAMESPACES": 1,
+        "HAVE_NEW_FOR_SCOPING": 1,
+        "HAVE_TEUCHOS_COMPLEX": 1,
+        "BELOS_TEUCHOS_TIME_MONITOR": 1,
+        "HAVE_BELOS_EXPERIMENTAL": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "BELOS_DEPRECATED_DECLARATIONS": "#define BELOS_DEPRECATED",
+    }
+)
+
+cc_library(
+    name = "belos",
+    srcs = glob([
+        "packages/belos/src/*.cpp",
+        "packages/belos/epetra/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/belos/src/*.h",
+        "packages/belos/src/*.hpp",
+        "packages/belos/epetra/src/*.h",
+        "packages/belos/epetra/src/*.hpp",
+    ]) + [
+        "packages/belos/src/Belos_config.h",
+    ],
+    includes = [
+        "packages/belos/src",
+        "packages/belos/epetra/src",
+    ],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+        ":epetraext_internal",
+        ":triutils",
+    ],
+)
+
+# TODO(pgron): Add tests in packages/belos
+
+cmake_substitution(
+    name = "nox_config_h",
+    src = "packages/nox/cmake/NOX_Config.h.in",
+    out = "packages/nox/src/NOX_Config.h",
+    substitutions = {
+        "HAVE_NOX_AMESOS": 1,
+        "HAVE_NOX_BELOS": 1,
+        "HAVE_NOX_EPETRAEXT": 1,
+        "INVALID_TEMPLATE_QUALIFIER": "",
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "NOX_TEUCHOS_TIME_MONITOR_DECLARATIONS": "",
+    }
+)
+
+cc_library(
+    name = "nox",
+    srcs = glob([
+        "packages/nox/src/*.cpp",
+        "packages/nox/src/*.C",
+        "packages/nox/src-epetra/*.cpp",
+        "packages/nox/src-epetra/*.C",
+        "packages/nox/src-lapack/*.cpp",
+        "packages/nox/src-lapack/*.C",
+        "packages/nox/src-loca/src/*.cpp",
+        "packages/nox/src-loca/src/*.C",
+        "packages/nox/src-loca/src-epetra/*.cpp",
+        "packages/nox/src-loca/src-epetra/*.C",
+        "packages/nox/src-loca/src-lapack/*.cpp",
+        "packages/nox/src-loca/src-lapack/*.C",
+    ], exclude = [
+        "packages/nox/src-loca/src/Anasazi_LOCA_Sort.C",
+        "packages/nox/src-loca/src/LOCA_Eigensolver_AnasaziStrategy.C",
+        "packages/nox/src-loca/src/LOCA_Bifurcation_PitchforkBord_NullVectorNormWRMS.C",
+        "packages/nox/src-loca/src/LOCA_Bifurcation_PitchforkBord_ParameterUpdateNorm.C",
+        "packages/nox/src-loca/src/LOCA_Bifurcation_PitchforkBord_SlackUpdateNorm.C",
+        "packages/nox/src-loca/src/LOCA_Bifurcation_TPBord_StatusTest_NullVectorNormWRMS.C",
+        "packages/nox/src-loca/src/LOCA_Bifurcation_TPBord_StatusTest_ParameterUpdateNorm.C",
+        "packages/nox/src-loca/src/LOCA_Continuation_StatusTest_ParameterResidualNorm.C",
+        "packages/nox/src-loca/src/LOCA_Continuation_StatusTest_ParameterUpdateNorm.C",
+        "packages/nox/src-loca/src/LOCA_SingularJacobianSolve_Default.C",
+        "packages/nox/src-loca/src/LOCA_SingularJacobianSolve_ItRef.C",
+        "packages/nox/src-loca/src/LOCA_SingularJacobianSolve_Manager.C",
+        "packages/nox/src-loca/src/LOCA_SingularJacobianSolve_Nic.C",
+        "packages/nox/src-loca/src/LOCA_SingularJacobianSolve_NicDay.C",
+        "packages/nox/src-loca/src/LOCA_StatusTest_Factory.C",
+    ]),
+    hdrs = glob([
+        "packages/nox/src/*.H",
+        "packages/nox/src/*.hpp",
+        "packages/nox/src-epetra/*.H",
+        "packages/nox/src-epetra/*.hpp",
+        "packages/nox/src-lapack/*.H",
+        "packages/nox/src-lapack/*.hpp",
+        "packages/nox/src-loca/src/*.H",
+        "packages/nox/src-loca/src/*.hpp",
+        "packages/nox/src-loca/src-epetra/*.H",
+        "packages/nox/src-loca/src-epetra/*.hpp",
+        "packages/nox/src-loca/src-lapack/*.H",
+        "packages/nox/src-loca/src-lapack/*.hpp",
+    ]) + [
+        "packages/nox/src/NOX_Config.h",
+    ],
+    includes = [
+        "packages/nox/src",
+        "packages/nox/src-epetra",
+        "packages/nox/src-lapack",
+        "packages/nox/src-loca/src",
+        "packages/nox/src-loca/src-epetra",
+        "packages/nox/src-loca/src-lapack",
+    ],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+    deps = [
+        ":amesos",
+        ":aztecoo",
+        ":epetra",
+        ":epetraext_internal",
+        ":ifpack",
+        ":teuchos",
+        ":trilinos_version",
+    ],
+)
+
+# TODO(pgron): Add tests in packages/nox
+
+cmake_substitution(
+    name = "sacado_config_h",
+    src = "packages/sacado/cmake/Sacado_config.h.in",
+    out = "packages/sacado/src/Sacado_config.h",
+    substitutions = {
+        "HAVE_SACADO_COMPLEX": 1,
+        "HAVE_SACADO_TEUCHOSCORE": 1,
+        "HAVE_SACADO_TEUCHOSCOMM": 1,
+        "HAVE_SACADO_TEUCHOSNUMERICS": 1,
+        "HAVE_SACADO_TEUCHOSKOKKOSCOMM": 1,
+        "HAVE_SACADO_VIEW_SPEC": 1,
+        "HAS_C99_TR1_CMATH": 1,
+        "HAVE_SACADO_CXX11": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+    }
+)
+
+cc_library(
+    name = "sacado",
+    srcs = glob([
+        "packages/sacado/src/**/*.c",
+        "packages/sacado/src/**/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/sacado/src/**/*.h",
+        "packages/sacado/src/**/*.hpp",
+    ]) + [
+        "packages/sacado/src/Sacado_config.h",
+    ],
+    includes = [
+        "packages/sacado/src",
+        "packages/sacado/src/mpl",
+        "packages/sacado/src/new_design",
+    ],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+    deps = [
+        ":teuchos",
+    ],
+)
+
+# TODO(pgron): Add tests in packages/sacado/test
+
+cc_library(
+    name = "suitesparse",
+    srcs = glob([
+        "packages/common/auxiliarySoftware/SuiteSparse/src/AMD/Source/*.c",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/BTF/Source/*.c",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CAMD/Source/*.c",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CCOLAMD/Source/*.c",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/COLAMD/Source/*.c",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/KLU/Source/*.c",
+    ]),
+    hdrs = glob([
+        "packages/common/auxiliarySoftware/SuiteSparse/src/AMD/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/BTF/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CAMD/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CCOLAMD/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/COLAMD/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/KLU/Include/*.h",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/UFconfig/*.h",
+    ]),
+    includes = [
+        "packages/common/auxiliarySoftware/SuiteSparse/src/AMD/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/BTF/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CAMD/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/CCOLAMD/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/COLAMD/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/KLU/Include",
+        "packages/common/auxiliarySoftware/SuiteSparse/src/UFconfig",
+    ],
+    copts = COPTS,
+)
+
+cmake_substitution(
+    name = "teuchoscore_config_h",
+    src = "packages/teuchos/core/cmake/TeuchosCore_config.h.in",
+    out = "packages/teuchos/core/src/TeuchosCore_config.h",
+    substitutions = {
+        "HAVE_TEUCHOSCORE_CXX11": 1,
+        "HAVE_TEUCHOSCORE_BOOST": 1,
+        "HAVE_TEUCHOSCORE_BOOST_IS_POLYMORPHIC": 1,
+    },
+    automake_substitutions = {
+        "YAML_CPP_DEF": 1,
+    },
+)
+
+cmake_substitution(
+    name = "teuchos_config_h",
+    src = "packages/teuchos/core/cmake/Teuchos_config.h.in",
+    out = "packages/teuchos/core/src/Teuchos_config.h",
+    substitutions = {
+        "HAVE_TEUCHOS_PARAMETERLIST": 1,
+        "HAVE_FPU_CONTROL_H": 1,
+        "HAVE_GCC_ABI_DEMANGLE": 1,
+        "HAVE_TEUCHOS_CXX_ATTRIBUTE_CONSTRUCTOR": 1,
+        "HAVE_TEUCHOS_CXX_ATTRIBUTE_WEAK": 1,
+        "HAVE_TEUCHOS_CXX_PRAGMA_WEAK": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+        # "HAVE_TEUCHOS_MPI": 1,
+        "HAVE_PROTECTED_NESTED_TEMPLATE_CLASS_ACCESS": 1,
+        "HAVE_TEUCHOS_FLOAT": 1,
+        "HAVE_TEUCHOS_COMPLEX": 1,
+        "HAVE_TEUCHOS_LONG_LONG_INT": 1,
+    },
+    automake_substitutions = {
+        "F77_BLAS_MANGLE": F77_BLAS_MANGLE,
+        "F77_FUNC": F77_BLAS_MANGLE,
+        "Teuchos_ORDINAL_TYPE": "int",
+        "INVALID_TEMPLATE_QUALIFIER": "",
+        "TEUCHOS_DEPRECATED_DECLARATIONS": "#define TEUCHOS_DEPRECATED",
+    },
+)
+
+cmake_substitution(
+    name = "teuchos_kokkoscompat_config_h",
+    src = "packages/teuchos/kokkoscompat/cmake/TeuchosKokkosCompat_config.h.in",
+    out = "packages/teuchos/kokkoscompat/src/TeuchosKokkosCompat_config.h",
+    substitutions = {
+    },
+)
+
+cmake_substitution(
+    name = "teuchos_remainder_config_h",
+    src = "packages/teuchos/remainder/cmake/TeuchosRemainder_config.h.in",
+    out = "packages/teuchos/remainder/src/TeuchosRemainder_config.h",
+    substitutions = {
+        "TRILINOS_HAVE_LINEAR_SOLVER_FACTORY_REGISTRATION": 1,
+    },
+)
+
+cc_library(
+    name = "teuchos_comm",
+    srcs = glob([
+        "packages/teuchos/comm/src/*.cpp",
+    ], exclude = [
+        "packages/teuchos/comm/src/Teuchos_Details_MpiCommRequest.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/comm/src/*.h",
+        "packages/teuchos/comm/src/*.hpp",
+    ]),
+    includes = ["packages/teuchos/comm/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+        ":teuchos_parameterlist",
+    ],
+)
+
+# TODO(pgron): Add tests in packages/teuchos/comm/test
+
+cc_library(
+    name = "teuchos_core",
+    srcs = glob([
+        "packages/teuchos/core/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/core/src/*.h",
+        "packages/teuchos/core/src/*.hpp",
+    ]) + [
+        "packages/teuchos/core/src/TeuchosCore_config.h",
+        "packages/teuchos/core/src/Teuchos_config.h",
+    ],
+    deps = [
+        ":trilinos_version",
+        "@com_google_open_silicon_bazel//dependency_support/lapack",
+        "@com_google_open_silicon_bazel//dependency_support/lapack:blas",
+    ],
+    includes = ["packages/teuchos/core/src"],
+    copts = COPTS,
+)
+
+TEUCHOS_UNIT_TEST_MAIN = "packages/teuchos/core/test/UnitTest/Teuchos_StandardUnitTestMain.cpp"
+
+cc_test(
+    name = "teuchos_allocator_test",
+    srcs = [
+        TEUCHOS_UNIT_TEST_MAIN,
+        "packages/teuchos/core/test/Allocator/Allocator.cpp",
+    ],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+# Note: This test needs an external assertion of output, but that's not done
+# here, so the test is not really complete.
+cc_test(
+    name = "teuchos_allocator_atexit_test",
+    srcs = ["packages/teuchos/core/test/Allocator/Allocator_atexit.cpp"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_test(
+    name = "teuchos_cwrappersupport_test",
+    srcs = [
+        TEUCHOS_UNIT_TEST_MAIN,
+        "packages/teuchos/core/test/CWrapperSupport/Teuchos_CWrapperSupport_UnitTests.cpp",
+        "packages/teuchos/core/test/CWrapperSupport/someCFunc.cpp",
+        "packages/teuchos/core/test/CWrapperSupport/someCFunc.h",
+    ],
+    copts = COPTS,
+    includes = [
+        "packages/teuchos/core/test/CWrapperSupport",
+    ],
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_test(
+    name = "teuchos_commandlineprocessor_test",
+    args = ["--verbose"],
+    srcs = [
+        "packages/teuchos/core/test/CommandLineProcessor/cxx_main.cpp",
+    ],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_test(
+    name = "teuchos_containers_test",
+    srcs = [
+        TEUCHOS_UNIT_TEST_MAIN,
+        "packages/teuchos/core/test/Containers/ConstNonconstObjectContainer.cpp",
+    ],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_test(
+    name = "teuchos_filtered_iterator_test",
+    srcs = [
+        TEUCHOS_UNIT_TEST_MAIN,
+        "packages/teuchos/core/test/FilteredIterator/FilteredIterator_UnitTests.cpp",
+    ],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+# TODO(pgron): Add tests in packages/teuchos/core/test/MemoryManagement
+# TODO(pgron): Add tests in packages/teuchos/core/test/ScalarTraits
+# TODO(pgron): Add tests in packages/teuchos/core/test/TabularOutputter
+# TODO(pgron): Add tests in packages/teuchos/core/test/TwoDArray
+# TODO(pgron): Add tests in packages/teuchos/core/test/TypeConversions
+# TODO(pgron): Add tests in packages/teuchos/core/test/UnitTest
+# TODO(pgron): Add tests in packages/teuchos/core/test/Workspace
+# TODO(pgron): Add tests in packages/teuchos/core/test/dyn_cast
+
+cc_library(
+    name = "teuchos_kokkoscomm",
+    srcs = glob([
+        "packages/teuchos/kokkoscomm/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/kokkoscomm/src/*.h",
+        "packages/teuchos/kokkoscomm/src/*.hpp",
+    ]),
+    includes = ["packages/teuchos/kokkoscomm/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_library(
+    name = "teuchos_numerics",
+    srcs = glob([
+        "packages/teuchos/numerics/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/numerics/src/*.h",
+        "packages/teuchos/numerics/src/*.hpp",
+    ]),
+    includes = ["packages/teuchos/numerics/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_library(
+    name = "teuchos_parameterlist",
+    srcs = glob([
+        "packages/teuchos/parameterlist/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/parameterlist/src/*.h",
+        "packages/teuchos/parameterlist/src/*.hpp",
+    ]),
+    includes = ["packages/teuchos/parameterlist/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+        "@com_github_jbeder_yaml_cpp//:yaml-cpp",
+    ],
+)
+
+cc_library(
+    name = "teuchos_parser",
+    srcs = glob([
+        "packages/teuchos/parser/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/parser/src/*.h",
+        "packages/teuchos/parser/src/*.hpp",
+    ]),
+    includes = ["packages/teuchos/parser/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_library(
+    name = "teuchos_remainder",
+    srcs = glob([
+        "packages/teuchos/remainder/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/teuchos/remainder/src/*.h",
+        "packages/teuchos/remainder/src/*.hpp",
+    ]) + [
+        "packages/teuchos/remainder/src/TeuchosRemainder_config.h",
+    ],
+    includes = ["packages/teuchos/remainder/src"],
+    copts = COPTS,
+    deps = [
+        ":teuchos_core",
+    ],
+)
+
+cc_library(
+    name = "teuchos",
+    deps = [
+        ":teuchos_comm",
+        ":teuchos_core",
+        ":teuchos_kokkoscomm",
+        ":teuchos_numerics",
+        ":teuchos_parameterlist",
+        ":teuchos_parser",
+        ":teuchos_remainder",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cmake_substitution(
+    name = "epetra_config_h",
+    src = "packages/epetra/cmake/Epetra_config.h.in",
+    out = "packages/epetra/src/Epetra_config.h",
+    substitutions = {
+        "HAVE_ASSERT_H": 1,
+        "HAVE_BLAS": 1,
+        "EPETRA_ADDRESS64BIT": 1,
+        "HAVE_EPETRA_TEUCHOS": 1,
+        "HAVE_LAPACK": 1,
+        "HAVE_MATH_H": 1,
+        "HAVE_MEMORY_H": 1,
+        # "HAVE_MPI": 1,
+        # "EPETRA_HAVE_OMP": 1,
+        "STDC_HEADERS": 1,
+    },
+    automake_substitutions = {
+        "F77_BLAS_MANGLE": F77_BLAS_MANGLE,
+        "EPETRA_DEPRECATED_DECLARATIONS": "",
+    },
+)
+
+cmake_substitution(
+    name = "epetra_dllexportmacro_h",
+    src = "packages/Trilinos_DLLExportMacro.h.in",
+    out = "packages/epetra/src/Epetra_DLLExportMacro.h",
+    substitutions = {
+    },
+    automake_substitutions = {
+        "CURRENT_PACKAGE": "EPETRA",
+    },
+)
+
+cc_library(
+    name = "epetra",
+    srcs = glob([
+        "packages/epetra/src/*.cpp",
+    ], exclude = [
+        "packages/epetra/src/Epetra_FastCrsMatrix.cpp",
+        "packages/epetra/src/Epetra_Fortran_wrappers.cpp",
+        "packages/epetra/src/Epetra_InvOperator.cpp",
+        "packages/epetra/src/Epetra_LinearProblemRedistor.cpp",
+        "packages/epetra/src/Epetra_Mpi*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/epetra/src/*.h",
+        "packages/epetra/src/*.hpp",
+    ]) + [
+        "packages/epetra/src/Epetra_config.h",
+        "packages/epetra/src/Epetra_DLLExportMacro.h",
+    ],
+    deps = [
+        ":teuchos",
+        "@com_google_open_silicon_bazel//dependency_support/lapack",
+        "@com_google_open_silicon_bazel//dependency_support/lapack:blas",
+    ],
+    includes = ["packages/epetra/src"],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+)
+
+[cc_test(
+    name = "epetra_basic_perf%s_test" % postfix,
+    args = ["16", "12", "1", "1", "25", "-v"],
+    srcs = [
+        "packages/epetra/test/BasicPerfTest%s/cxx_main.cpp" % postfix,
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+) for postfix in ["", "_LL"]]
+
+cc_library(
+    name = "epetra_test_utilities",
+    testonly = 1,
+    srcs = glob([
+        "packages/epetra/test/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/epetra/test/src/*.h",
+    ]),
+    includes = ["packages/epetra/test/src"],
+    deps = [
+        ":epetra",
+    ],
+)
+
+EPETRA_SIMPLE_TESTS = {
+    "epetra_basic_block_map_test": "packages/epetra/test/BlockMap",
+    "epetra_basic_block_map_ll_test": "packages/epetra/test/BlockMap_LL",
+    # Disabled because it uses MPI: "epetra_bugs_Bug_5988_FECrs_buildNonlocalGraph_test": "packages/epetra/test/Bugs/Bug_5988_FECrs_buildNonlocalGraph",
+    "epetra_bugs_Bug_6079_DistObject_CombineMode_flags_test": "packages/epetra/test/Bugs/Bug_6079_DistObject_CombineMode_flags",
+    "epetra_bugs_ll_Bug_5791_StaticProfile_LL_test": "packages/epetra/test/Bugs_LL/Bug_5791_StaticProfile_LL",
+    "epetra_bugs_ll_Bug_5794_IndexBase_LL_test": "packages/epetra/test/Bugs_LL/Bug_5794_IndexBase_LL",
+    "epetra_bugs_ll_Bug_5797_Sort_MakeColMap_LL_test": "packages/epetra/test/Bugs_LL/Bug_5797_Sort_MakeColMap_LL",
+    # Disabled because it uses MPI: "epetra_bugs_ll_Bug_5988_FECrs_buildNonlocalGraph_LL_test": "packages/epetra/test/Bugs_LL/Bug_5988_FECrs_buildNonlocalGraph_LL",
+    "epetra_bugs_ll_Bug_6079_DistObject_CombineMode_flags_LL_test": "packages/epetra/test/Bugs_LL/Bug_6079_DistObject_CombineMode_flags_LL",
+    "epetra_crs_graph_test": "packages/epetra/test/CrsGraph",
+    "epetra_crs_graph_ll_test": "packages/epetra/test/CrsGraph_LL",
+    "epetra_crs_rect_matrix_test": "packages/epetra/test/CrsRectMatrix",
+    "epetra_crs_rect_matrix_ll_test": "packages/epetra/test/CrsRectMatrix_LL",
+    "epetra_directory_test": "packages/epetra/test/Directory",
+    "epetra_directory_ll_test": "packages/epetra/test/Directory_LL",
+    "epetra_fe_crs_graph_test": "packages/epetra/test/FECrsGraph",
+    "epetra_fe_crs_graph_ll_test": "packages/epetra/test/FECrsGraph_LL",
+    "epetra_fe_vbr_matrix_test": "packages/epetra/test/FEVbrMatrix",
+    "epetra_fused_import_export_test": "packages/epetra/test/FusedImportExport",
+    "epetra_fused_import_export_ll_test": "packages/epetra/test/FusedImportExport_LL",
+    "epetra_import_export_test": "packages/epetra/test/ImportExport",
+    "epetra_import_export_ll_test": "packages/epetra/test/ImportExport_LL",
+    "epetra_int_serial_dense_test": "packages/epetra/test/IntSerialDense",
+    "epetra_map_test": "packages/epetra/test/Map",
+    "epetra_map_ll_test": "packages/epetra/test/Map_LL",
+    "epetra_map_coloring_test": "packages/epetra/test/MapColoring",
+    "epetra_map_coloring_ll_test": "packages/epetra/test/MapColoring_LL",
+    "epetra_oski_test": "packages/epetra/test/OSKI",
+    "epetra_object_test": "packages/epetra/test/Object",
+    "epetra_row_matrix_test": "packages/epetra/test/RowMatrix",
+    "epetra_row_matrix_ll_test": "packages/epetra/test/RowMatrix_LL",
+    "epetra_row_matrix_transposer_test": "packages/epetra/test/RowMatrixTransposer",
+    "epetra_serial_dense_test": "packages/epetra/test/SerialDense",
+    "epetra_serial_dense_ll_test": "packages/epetra/test/SerialDense_LL",
+    "epetra_serial_spd_dense_test": "packages/epetra/test/SerialSpdDense",
+    "epetra_simple_long_long_test": "packages/epetra/test/SimpleLongLongTest",
+    "epetra_vbr_matrix_test": "packages/epetra/test/VbrMatrix",
+    "epetra_vector_test": "packages/epetra/test/Vector",
+}
+
+[cc_test(
+    name = test,
+    args = ["-v"],
+    srcs = glob([
+        "%s/*.cpp" % EPETRA_SIMPLE_TESTS[test],
+        "%s/*.h" % EPETRA_SIMPLE_TESTS[test],
+    ]) + [
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+        ":epetra_test_utilities",
+    ],
+) for test in EPETRA_SIMPLE_TESTS]
+
+cc_test(
+    name = "epetra_comm_test",
+    srcs = [
+        "packages/epetra/test/Comm/cxx_main.cpp",
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+)
+
+[cc_test(
+    name = "epetra_crs_matrix%s_test" % postfix,
+    srcs = [
+        "packages/epetra/test/CrsMatrix%s/cxx_main.cpp" % postfix,
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+) for postfix in ["", "_LL"]]
+
+[cc_test(
+    name = "epetra_crs_matrix%s_memory_test" % postfix,
+    srcs = [
+        "packages/epetra/test/CrsMatrix%s/memorytest_main.cpp" % postfix,
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+) for postfix in ["", "_LL"]]
+
+[cc_test(
+    name = "epetra_fe_crs_matrix%s_test" % postfix,
+    srcs = [
+        "packages/epetra/test/FECrsMatrix%s/cxx_main.cpp" % postfix,
+        "packages/epetra/test/FECrsMatrix%s/ExecuteTestProblems.cpp" % postfix,
+        "packages/epetra/test/FECrsMatrix%s/ExecuteTestProblems.h" % postfix,
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+        ":epetra_test_utilities",
+    ],
+) for postfix in ["", "_LL"]]
+
+[cc_test(
+    name = "epetra_fe_crs_matrix%s_fematrix2_test" % postfix,
+    srcs = [
+        "packages/epetra/test/FECrsMatrix%s/fematrix2.cpp" % postfix,
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+) for postfix in ["", "_LL"]]
+
+cc_test(
+    name = "epetra_fe_vector_test",
+    srcs = [
+        "packages/epetra/test/FEVector/fevector.cpp",
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+)
+
+cc_test(
+    name = "epetra_fe_vector2_test",
+    srcs = [
+        "packages/epetra/test/FEVector/cxx_main.cpp",
+        "packages/epetra/test/FEVector/ExecuteTestProblems.cpp",
+        "packages/epetra/test/FEVector/ExecuteTestProblems.h",
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+        ":epetra_test_utilities",
+    ],
+)
+
+cc_test(
+    name = "epetra_multivector_test",
+    srcs = [
+        "packages/epetra/test/MultiVector/BuildTestProblems.cpp",
+        "packages/epetra/test/MultiVector/BuildTestProblems.h",
+        "packages/epetra/test/MultiVector/cxx_main.cpp",
+        "packages/epetra/test/MultiVector/ExecuteTestProblems.cpp",
+        "packages/epetra/test/MultiVector/ExecuteTestProblems.h",
+        "packages/epetra/test/epetra_test_err.h",
+    ],
+    copts = COPTS,
+    deps = [
+        ":epetra",
+    ],
+)
+
+cmake_substitution(
+    name = "epetraext_config_h",
+    src = "packages/epetraext/cmake/EpetraExt_config.h.in",
+    out = "packages/epetraext/src/EpetraExt_config.h",
+    substitutions = {
+        "HAVE_BLOCK": 1,
+        "HAVE_BTF": 1,
+        "HAVE_COLORING": 1,
+        "HAVE_EPETRAEXT_TRIUTILS": 1,
+        "HAVE_EXPERIMENTAL": 1,
+        "HAVE_GRAPH_REORDERINGS": 1,
+        "HAVE_INOUT": 1,
+        "HAVE_MODEL_EVALUATOR": 1,
+        "HAVE_RESTRICT": 1,
+        "HAVE_TRANSFORM": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "EPETRAEXT_DEPRECATED_DECLARATIONS": "",
+    },
+)
+
+cc_library(
+    name = "epetraext_internal",
+    srcs = glob([
+        "packages/epetraext/src/**/*.cpp",
+    ], exclude = [
+        "packages/epetraext/src/inout/EpetraExt_HDF5_DistObject.cpp",
+        "packages/epetraext/src/matlab/*.cpp",
+        "packages/epetraext/src/block/EpetraExt_MultiMpiComm.cpp",
+        "packages/epetraext/src/transform/EpetraExt_StaticCondensation_LinearProblem.cpp",
+    ]),
+    hdrs = glob([
+        "packages/epetraext/src/**/*.h",
+        "packages/epetraext/src/**/*.hpp",
+    ]) + [
+        "packages/epetraext/src/EpetraExt_config.h",
+    ],
+    deps = [
+        ":epetra",
+        ":triutils",
+        "@edu_tamu_suitesparse//:amd",
+    ],
+    includes = [
+        "packages/epetraext/src",
+        "packages/epetraext/src/block",
+        "packages/epetraext/src/btf",
+        "packages/epetraext/src/coloring",
+        "packages/epetraext/src/inout",
+        "packages/epetraext/src/model_evaluator",
+        "packages/epetraext/src/transform",
+    ],
+    copts = COPTS,
+)
+
+cc_library(
+    name = "epetraext",
+    visibility = ["//visibility:public"],
+    deps = [
+        "epetraext_internal",
+        "trilinoscouplings_epetraext",
+    ],
+)
+
+cmake_substitution(
+    name = "ifpack_config_h",
+    src = "packages/ifpack/cmake/Ifpack_config.h.in",
+    out = "packages/ifpack/src/Ifpack_config.h",
+    substitutions = {
+        "HAVE_IFPACK_AMESOS": 1,
+        "HAVE_IFPACK_AZTECOO": 1,
+        "HAVE_IFPACK_EPETRAEXT": 1,
+        "IFPACK_TEUCHOS_TIME_MONITOR": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "IFPACK_DEPRECATED_DECLARATIONS": "#define IFPACK_DEPRECATED",
+    },
+)
+
+cc_library(
+    name = "ifpack",
+    srcs = glob([
+        "packages/ifpack/src/**/*.c",
+        "packages/ifpack/src/**/*.cpp",
+    ], exclude = [
+        "packages/ifpack/src/az_ifpack*",
+        "packages/ifpack/src/euclid/*.c",
+        "packages/ifpack/src/Ifpack_CrsIlut.cpp",
+        "packages/ifpack/src/Ifpack_CrsRick.cpp",
+        "packages/ifpack/src/Ifpack_HashTable.cpp",
+        "packages/ifpack/src/Ifpack_OverlapFactor.*",
+        "packages/ifpack/src/Ifpack_OverlapSolveObject..*",
+        "packages/ifpack/src/ifp_Block",
+        "packages/ifpack/src/ifp_DenseMat.*",
+        "packages/ifpack/src/ifp_Local.*",
+        "packages/ifpack/src/ifp_Precon..*",
+        "packages/ifpack/src/ifp_SparseUtil..*",
+        "packages/ifpack/src/ifp_arch.h",
+        "packages/ifpack/src/ifp_b.*",
+        "packages/ifpack/src/ifp_c_wrappers..*",
+        "packages/ifpack/src/ifp_sp.*",
+    ]),
+    hdrs = glob([
+        "packages/ifpack/src/**/*.h",
+        "packages/ifpack/src/**/*.hpp",
+    ]) + [
+        "packages/ifpack/src/Ifpack_config.h",
+    ],
+    deps = [
+        ":amesos",
+        ":aztecoo",
+        ":epetraext_internal",
+    ],
+    includes = ["packages/ifpack/src"],
+    visibility = ["//visibility:public"],
+    copts = COPTS,
+)
+
+cmake_substitution(
+    name = "triutils_config_h",
+    src = "packages/triutils/cmake/Triutils_config.h.in",
+    out = "packages/triutils/src/Triutils_config.h",
+    substitutions = {
+        "HAVE_BOOL": 1,
+        "HAVE_CMATH": 1,
+        "HAVE_CSTDIO": 1,
+        "HAVE_CSTDLIB": 1,
+        "HAVE_INTTYPES_H": 1,
+        "HAVE_IOSTREAM": 1,
+        "HAVE_IOSTREAM_H": 1,
+        "HAVE_LIBCHECK": 1,
+        "HAVE_MALLOC": 1,
+        "HAVE_MAP": 1,
+        "HAVE_MAP_H": 1,
+        "HAVE_MATH_H": 1,
+        "HAVE_MEMORY_H": 1,
+        "HAVE_MUTABLE": 1,
+        "HAVE_NAMESPACES": 1,
+        "HAVE_NEW_FOR_SCOPING": 1,
+        "HAVE_STDINT_H": 1,
+        "HAVE_STDIO_H": 1,
+        "HAVE_STDLIB_H": 1,
+        "HAVE_STD_SPRINTF": 1,
+        "HAVE_STL": 1,
+        "HAVE_STRING": 1,
+        "HAVE_STRINGS_H": 1,
+        "HAVE_STRING_H": 1,
+        "HAVE_TRIUTILS_TESTS": 1,
+        "STDC_HEADERS": 1,
+        "HAVE_TRIUTILS_EPETRA": 1,
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+)
+
+cc_library(
+    name = "triutils",
+    srcs = glob([
+        "packages/triutils/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "packages/triutils/src/*.h",
+        "packages/triutils/src/*.hpp",
+    ]) + [
+        "packages/triutils/src/Triutils_config.h",
+    ],
+    includes = [
+        "packages/triutils/src",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":epetra",
+    ],
+    copts = COPTS,
+)
+
+cmake_substitution(
+    name = "trilinoscouplings_config_h",
+    src = "packages/trilinoscouplings/cmake/TrilinosCouplings_config.h.in",
+    out = "packages/trilinoscouplings/src/TrilinosCouplings_config.h",
+    substitutions = {
+        "HAVE_AMESOS": 1,
+        "HAVE_EPETRAEXT": 1,
+        "HAVE_IFPACK": 1,
+        "HAVE_INTTYPES_H": "",
+        # MPI is not enabled:
+        # "HAVE_MPI": 1,
+    },
+    automake_substitutions = {
+        "HAVE_INTTYPES_H": 1,
+    },
+)
+
+cc_library(
+    name = "trilinoscouplings_epetraext",
+    srcs = glob([
+        "packages/trilinoscouplings/src/epetraext/*.cpp",
+    ], exclude = [
+        "packages/trilinoscouplings/src/epetraext/EpetraExt_AmesosBTFGlobal_LinearProblem.cpp",
+        "packages/trilinoscouplings/src/epetraext/EpetraExt_Isorropia_CrsGraph.cpp",
+    ]),
+    hdrs = glob([
+        "packages/trilinoscouplings/src/epetraext/*.h",
+        "packages/trilinoscouplings/src/epetraext/*.hpp",
+    ]) + [
+        "packages/trilinoscouplings/src/TrilinosCouplings_config.h",
+    ],
+    includes = [
+        "packages/trilinoscouplings/src",
+        "packages/trilinoscouplings/src/epetraext",
+    ],
+    deps = [
+        ":amesos",
+        ":epetraext_internal",
+    ],
+    copts = COPTS,
+)
