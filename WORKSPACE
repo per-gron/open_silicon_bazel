@@ -36,3 +36,6 @@ llvm_toolchain(
         "linux": "clang+llvm-10.0.1-x86_64-pc-linux-gnu",
     },
 )
+
+load("@com_google_open_silicon_bazel_pip_deps//:requirements.bzl", "pip_install")
+pip_install()

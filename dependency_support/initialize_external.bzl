@@ -16,8 +16,16 @@
 
 load("//dependency_support/boost:initialize.bzl", initialize_boost = "initialize")
 load("//dependency_support/pybind11:initialize.bzl", initialize_pybind11 = "initialize")
+load("@rules_python//python:pip.bzl", "pip_import")
+load("@rules_python//python:pip.bzl", "pip_repositories")
 
 def initialize_external_repositories():
     """Calls set-up methods for external repositories that require that."""
     initialize_boost()
     initialize_pybind11()
+    pip_repositories()
+    pip_import(
+        name = "com_google_open_silicon_bazel_pip_deps",
+        requirements = "//dependency_support:pip_requirements.txt",
+        python_interpreter = "python3",
+    )
