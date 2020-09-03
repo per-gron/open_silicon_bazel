@@ -64,3 +64,15 @@ index 0c74aa0..0755380 100644
      }
  };
  
+diff --git include/cbag/schematic/cellview_info.h include/cbag/schematic/cellview_info.h
+index 25bae46..032cf50 100644
+--- include/cbag/schematic/cellview_info.h
++++ include/cbag/schematic/cellview_info.h
+@@ -49,6 +49,7 @@ limitations under the License.
+ 
+ #include <array>
+ #include <string>
++#include <unordered_map>
+ #include <vector>
+ 
+ #include <cbag/common/param_map.h>

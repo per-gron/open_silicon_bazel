@@ -12,20 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package(default_visibility = ["//visibility:public"])
+load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
-load("@com_google_open_silicon_bazel//dependency_support/pybind11:pybind11.bzl", "pybind_extension_and_library")
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-pybind_extension_and_library(
-    name = "pybag",
+pybind_extension(
+    name = "src/pybag/core",
     srcs = glob([
         "src/**/*.cpp",
         "src/**/*.h",
     ], exclude = [
         "src/pybag/oa.cpp",
     ]),
+    defines = ["PYBAG_OPEN_SOURCE"],
     includes = ["src"],
     deps = [
         "@com_bcanalog_cbag//:cbag",
@@ -33,4 +34,13 @@ pybind_extension_and_library(
         "@com_github_jbeder_yaml_cpp//:yaml-cpp",
         "@com_github_pkerichang_pybind11_generics//:pybind11_generics",
     ],
+)
+
+py_library(
+    name = "pybag",
+    data = ["src/pybag/core.so"],
+    srcs = glob([
+        "src/pybag/*.py",
+    ]),
+    imports = ["src"],
 )

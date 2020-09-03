@@ -12,12 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Loads the Pybind11 Python<->C++ binding library."""
-
-load("@pybind11_bazel//:python_configure.bzl", "python_configure")
-
-def initialize():
-    python_configure(
-        name = "local_config_python",
-        python_version = "3",
-    )
+# Required to make this a package.

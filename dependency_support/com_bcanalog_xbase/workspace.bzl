@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Loads the PYBAG Polygon wrapper library for CBAG."""
+"""Loads the Xbase framework for layout generators in BAG."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
@@ -20,14 +20,11 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 def repo():
     maybe(
         http_archive,
-        name = "com_bcanalog_pybag",
+        name = "com_bcanalog_xbase",
         urls = [
-            "https://github.com/bluecheetah/pybag/archive/00ef50ecefc5e337c8fe9877c1813129d2163dcc.zip",  # 2020-08-23
+            "https://github.com/bluecheetah/xbase/archive/224059464fb60add4532cb2d5b85780698be1ab9.zip",  # 2020-09-03
         ],
-        strip_prefix = "pybag-00ef50ecefc5e337c8fe9877c1813129d2163dcc",
-        sha256 = "5260379c8aced4328a46268556a814ae6374ad52a007d7427e3e52aa1b572477",
-        build_file = Label("//dependency_support/com_bcanalog_pybag:bundled.BUILD.bazel"),
-        patches = [
-            "@com_google_open_silicon_bazel//dependency_support/com_bcanalog_pybag:exclude_oa.patch",
-        ],
+        strip_prefix = "xbase-224059464fb60add4532cb2d5b85780698be1ab9",
+        sha256 = "198b33c974f3e9e472854561450a610eb27394fc9f45099d162e5ee923ee2170",
+        build_file = Label("//dependency_support/com_bcanalog_xbase:bundled.BUILD.bazel"),
     )

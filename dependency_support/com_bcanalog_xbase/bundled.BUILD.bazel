@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Loads the Pybind11 Python<->C++ binding library."""
+load("@com_google_open_silicon_bazel_pip_deps//:requirements.bzl", "requirement")
 
-load("@pybind11_bazel//:python_configure.bzl", "python_configure")
+licenses(["notice"])
 
-def initialize():
-    python_configure(
-        name = "local_config_python",
-        python_version = "3",
-    )
+py_library(
+    name = "xbase",
+    srcs = glob(["src/**/*.py"]),
+    imports = ["src"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_bcanalog_bag//:bag",
+        requirement("decorator"),
+        requirement("networkx"),
+    ],
+)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Loads the PYBAG Polygon wrapper library for CBAG."""
+"""Loads the BAG analog circuit generator toolkit."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
@@ -20,14 +20,11 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 def repo():
     maybe(
         http_archive,
-        name = "com_bcanalog_pybag",
+        name = "com_bcanalog_bag",
         urls = [
-            "https://github.com/bluecheetah/pybag/archive/00ef50ecefc5e337c8fe9877c1813129d2163dcc.zip",  # 2020-08-23
+            "https://github.com/bluecheetah/bag/archive/a496368ad8fc92ff0f5bf3bfb4ebaa45c540a104.zip",  # 2020-09-03
         ],
-        strip_prefix = "pybag-00ef50ecefc5e337c8fe9877c1813129d2163dcc",
-        sha256 = "5260379c8aced4328a46268556a814ae6374ad52a007d7427e3e52aa1b572477",
-        build_file = Label("//dependency_support/com_bcanalog_pybag:bundled.BUILD.bazel"),
-        patches = [
-            "@com_google_open_silicon_bazel//dependency_support/com_bcanalog_pybag:exclude_oa.patch",
-        ],
+        strip_prefix = "bag-a496368ad8fc92ff0f5bf3bfb4ebaa45c540a104",
+        sha256 = "796a60e9fab3f3f6fc3956c6b3611f4030e82c440e541ade8841ad6a79beeeca",
+        build_file = Label("//dependency_support/com_bcanalog_bag:bundled.BUILD.bazel"),
     )
