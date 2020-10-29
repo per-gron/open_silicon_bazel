@@ -70,25 +70,27 @@ def load_external_repositories():
     repo_tcl()
     repo_zlib()
 
-    http_archive(
+    maybe(
+        http_archive,
         name = "com_google_googletest",
         urls = ["https://github.com/google/googletest/archive/0eea2e9fc63461761dea5f2f517bd6af2ca024fa.zip"],  # 2020-04-30
         strip_prefix = "googletest-0eea2e9fc63461761dea5f2f517bd6af2ca024fa",
         sha256 = "9463ff914d7c3db02de6bd40a3c412a74e979e3c76eaa89920a49ff8488d6d69",
     )
 
-    http_archive(
+    maybe(
+        http_archive,
         name = "com_google_absl",
         strip_prefix = "abseil-cpp-a1d6689907864974118e592ef2ac7d716c576aad",
         urls = ["https://github.com/abseil/abseil-cpp/archive/a1d6689907864974118e592ef2ac7d716c576aad.zip"],
         sha256 = "53b78ffe87db3c737feddda52fa10dcdb75e2d85eed1cb1c5bfd77ca22e53e53",
     )
 
-    http_archive(
+    maybe(
+        http_archive,
         name = "rules_python",
-        url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.2/rules_python-0.0.2.tar.gz",
-        strip_prefix = "rules_python-0.0.2",
-        sha256 = "b5668cde8bb6e3515057ef465a35ad712214962f0b3a314e551204266c7be90c",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
+        sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
     )
 
     maybe(

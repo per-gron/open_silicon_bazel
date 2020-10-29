@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//dependency_support:load_external.bzl", "load_external_repositories")
 load_external_repositories()
 load("//dependency_support:initialize_external.bzl", "initialize_external_repositories")
-initialize_external_repositories()
+initialize_external_repositories(python_interpreter="python3")
 
 http_archive(
     name = "com_grail_bazel_toolchain",
@@ -36,6 +36,3 @@ llvm_toolchain(
         "linux": "clang+llvm-10.0.1-x86_64-pc-linux-gnu",
     },
 )
-
-load("@com_google_open_silicon_bazel_pip_deps//:requirements.bzl", "pip_install")
-pip_install()
