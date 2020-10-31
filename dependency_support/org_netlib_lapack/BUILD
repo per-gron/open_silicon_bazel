@@ -12,22 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Alias for an underlying BLAS implementation. This is what other targets
-# should depend on, to make it easy to swap out the implementation.
-cc_library(
-    name = "blas",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@org_tuxfamily_eigen//:blas",
-    ],
-)
-
-# Alias for an underlying LAPACK implementation. This is what other targets
-# should depend on, to make it easy to swap out the implementation.
-cc_library(
-    name = "lapack",
-    deps = [
-        "@org_netlib_lapack//:lapack",
-    ],
-    visibility = ["//visibility:public"],
-)
