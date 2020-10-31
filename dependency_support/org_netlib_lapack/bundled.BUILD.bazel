@@ -2109,7 +2109,8 @@ ALL_SOURCES = depset(SINGLE_SOURCES + DOUBLE_SOURCES + COMPLEX_SOURCES + COMPLEX
         src.replace(".f", "").replace(".F", "") + ".o"
     ],
     message = "Compiling " + src,
-    cmd = "$(location @com_github_flang_compiler_flang//:bin/flang) -O2 -fPIC -DNDEBUG -c $(location " + src + ") -o $@",
+    # -Kieee is to be sure to use IEEE math despite using a high optimization level.
+    cmd = "$(location @com_github_flang_compiler_flang//:bin/flang) -O2 -Kieee -fPIC -DNDEBUG -c $(location " + src + ") -o $@",
 ) for src in ALL_SOURCES]
 
 cc_library(
