@@ -15,7 +15,7 @@
 # Description:
 #   A BUILD file for m4 based on FSF stock source.
 
-load("@com_google_open_silicon_bazel//dependency_support:copy.bzl", "copy", "touch")
+load("@com_google_open_silicon_bazel//dependency_support:copy.bzl", "touch")
 load("@com_google_open_silicon_bazel//dependency_support:pseudo_configure.bzl", "pseudo_configure")
 
 package(
@@ -91,7 +91,6 @@ cc_binary(
     ],
     output_licenses = ["unencumbered"],
     defines = [
-        "_IO_ftrylockfile",
         # Glibc 2.28 made _IO_IN_BACKUP private.  For now, work around this
         # problem by defining it ourselves.  FIXME: Do not rely on glibc
         # internals.

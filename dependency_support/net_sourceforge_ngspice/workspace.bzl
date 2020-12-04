@@ -18,14 +18,16 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def repo():
+    native.new_local_repository(
+        name = "net_sourceforge_ngspice",
+        path = "/home/per/Downloads/ngspice",
+        build_file = "//dependency_support/net_sourceforge_ngspice:bundled.BUILD.bazel",
+    )
     maybe(
         new_git_repository,
-        name = "org_gnu_readline",
-        commit = "8e6ccd0373d77b86ed37a9a7d232ccfea3d6670c",  # 8.0, 2020-08-24
-        remote = "https://git.savannah.gnu.org/git/readline.git",
-        shallow_since = "1546871421 -0500",
-        build_file = Label("//dependency_support/org_gnu_readline:bundled.BUILD.bazel"),
-        patches = [
-            "@com_google_open_silicon_bazel//dependency_support/org_gnu_readline:missing_include.patch",
-        ],
+        name = "net_sourceforge_ngspice",
+        commit = "371ad3496c684c620e9ad6fb34f6a4bca10f7bac",  # ngspice-33, 2020-12-03
+        remote = "git://git.code.sf.net/p/ngspice/ngspice",
+        shallow_since = "1603013722 +0200",
+        build_file = Label("//dependency_support/net_sourceforge_ngspice:bundled.BUILD.bazel"),
     )

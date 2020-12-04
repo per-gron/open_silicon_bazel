@@ -14,7 +14,7 @@
 
 """Fake configuration step for hacky substitutions in ".in" files."""
 
-def pseudo_configure(name, src, out, defs, mappings, additional = None):
+def pseudo_configure(name, out, src = None, defs = [], mappings = {}, additional = None):
     """Creates a genrule that performs a fake 'configure' step on a file.
     Args:
       name: Name to use for the created genrule.
@@ -28,10 +28,16 @@ def pseudo_configure(name, src, out, defs, mappings, additional = None):
 
     cmd = ""
 
+    if src == None:
+        cmd += "echo '#pragma once' >> $@ &&"
+
     for k, v in additional.items():
         cmd += "echo '#define %s %s' >> $@ &&" % (k, v)
 
-    cmd += "cat $<"
+    if src != None:
+        cmd += "cat $<"
+    else:
+        cmd += "echo"
     all_defs = ""
     for def_ in defs:
         cmd += r"| perl -p -e 's/#\s*undef \b(" + def_ + r")\b/#define $$1 1/'"
@@ -44,8 +50,8 @@ def pseudo_configure(name, src, out, defs, mappings, additional = None):
     cmd += " >> $@"
     native.genrule(
         name = name,
-        srcs = [src],
+        srcs = [src] if src != None else [],
         outs = [out],
         cmd = cmd,
-        message = "Configuring " + src,
+        message = "Configuring " + (src if src else out),
     )

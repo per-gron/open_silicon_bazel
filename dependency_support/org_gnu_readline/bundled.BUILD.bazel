@@ -41,7 +41,20 @@ cc_library(
         ".",
         "readline",
     ],
-    deps = ["@net_invisible_island_ncurses//:ncurses"],
+    deps = [
+        ":prefixed_readline_header",
+        "@net_invisible_island_ncurses//:ncurses",
+    ],
+)
+
+cc_library(
+    name = "prefixed_readline_header",
+    include_prefix = "readline",
+    hdrs = glob(["*.h"]) + [
+        "config.h",
+        "emacs_keymap.c",
+        "vi_keymap.c",
+    ],
 )
 
 pseudo_configure(
