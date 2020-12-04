@@ -18,11 +18,6 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def repo():
-    native.new_local_repository(
-        name = "net_sourceforge_ngspice",
-        path = "/home/per/Downloads/ngspice",
-        build_file = "//dependency_support/net_sourceforge_ngspice:bundled.BUILD.bazel",
-    )
     maybe(
         new_git_repository,
         name = "net_sourceforge_ngspice",
