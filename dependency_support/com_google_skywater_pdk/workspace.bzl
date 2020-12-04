@@ -31,10 +31,10 @@ def repo():
         http_archive,
         name = "com_google_skywater_pdk",
         urls = [
-            "https://github.com/google/skywater-pdk/archive/8de719a7bb445bf56a6f1fe11db162ccc783f37d.tar.gz",  # 2020-09-01
+            "https://github.com/google/skywater-pdk/archive/3d7617a1acb92ea883539bcf22a632d6361a5de4.tar.gz",  # 2020-12-04
         ],
-        strip_prefix = "skywater-pdk-8de719a7bb445bf56a6f1fe11db162ccc783f37d",
-        sha256 = "5abdb44d5283f82fb61cbee5db03ba8512f0b0e28a22c8705654afb6a928c150",
+        strip_prefix = "skywater-pdk-3d7617a1acb92ea883539bcf22a632d6361a5de4",
+        sha256 = "49e5b03c26131a03eb038697d396a6ebf14058d78196f5d95c2bbdb0bdc8f32e",
         build_file = Label("//dependency_support/com_google_skywater_pdk:bundled.BUILD.bazel"),
     )
 

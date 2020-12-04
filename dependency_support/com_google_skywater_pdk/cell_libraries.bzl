@@ -23,8 +23,8 @@ This is used by the Bazel rules to set up the proper workspaces and targets."""
 # cell library versions.
 CELL_LIBRARIES = {
     "sky130_fd_sc_hd": {
-        "commit": "74c2ab17ad6c7749f3cd503d28c42758ddb98e23",  # v0.0.2, 2020-09-01
-        "shallow_since": "1595647393 -0700",
+        "commit": "ac7fb61f06e6470b94e8afdf7c25268f62fbd7b1",  # v0.0.2, 2020-12-04
+        "shallow_since": "1605028103 -0800",
         "corners": {
             "ff_100C_1v65": ["basic"],
             "ff_100C_1v95": ["basic"],
@@ -45,8 +45,8 @@ CELL_LIBRARIES = {
         },
     },
     "sky130_fd_sc_hdll": {
-        "commit": "8cc94d234e6c72441a7b1d255f50468944530b84",  # v0.1.1, 2020-09-01
-        "shallow_since": "1595647438 -0700",
+        "commit": "0694bd23893de20f5233ef024acf6cca1e750ac6",  # v0.1.1, 2020-12-04
+        "shallow_since": "1604475910 -0800",
         "corners": {
             "ff_100C_1v65": ["basic"],
             "ff_100C_1v95": ["basic"],
@@ -62,8 +62,8 @@ CELL_LIBRARIES = {
         },
     },
     "sky130_fd_sc_hs": {
-        "commit": "5e6297f4c63b7e05c182e2fe671c16c4a5aac9af",  # v0.0.2, 2020-09-01
-        "shallow_since": "1595647602 -0700",
+        "commit": "1d051f49bfe4e2fe9108d702a8bc2e9c081005a4",  # v0.0.2, 2020-12-04
+        "shallow_since": "1605574092 -0800",
         "corners": {
             "ff_100C_1v95": ["basic"],
             "ff_150C_1v95": ["basic"],
@@ -88,9 +88,92 @@ CELL_LIBRARIES = {
             "tt_150C_1v80": ["basic"],
         },
     },
+    "sky130_fd_sc_hvl": {
+        "commit": "4fd4f858d16c558a6a488b200649e909bb4dd800",  # v0.0.3, 2020-12-04
+        "shallow_since": "1604476031 -0800",
+        "corners": {
+            "ff_085C_5v50": ["basic"],
+            "ff_085C_5v50_lv1v95": ["basic"],
+            "ff_100C_5v50": ["basic"],
+            "ff_100C_5v50_lowhv1v65_lv1v95": ["basic"],
+            "ff_100C_5v50_lv1v95": ["basic"],
+            "ff_150C_5v50": ["basic"],
+            "ff_150C_5v50_lv1v95": ["basic"],
+            "ff_n40C_4v40": ["basic"],
+            "ff_n40C_4v40_lv1v95": ["basic"],
+            "ff_n40C_4v95": ["basic"],
+            "ff_n40C_4v95_lv1v95": ["basic"],
+            "ff_n40C_5v50": ["basic", "ccsnoise"],
+            "ff_n40C_5v50_lowhv1v65_lv1v95": ["basic"],
+            "ff_n40C_5v50_lv1v95": ["basic", "ccsnoise"],
+            "hvff_lvss_100C_5v50_lowhv1v65_lv1v60": ["basic"],
+            "hvff_lvss_100C_5v50_lv1v40": ["basic"],
+            "hvff_lvss_100C_5v50_lv1v60": ["basic"],
+            "hvff_lvss_n40C_5v50_lowhv1v65_lv1v60": ["basic"],
+            "hvff_lvss_n40C_5v50_lv1v35": ["basic"],
+            "hvff_lvss_n40C_5v50_lv1v60": ["basic"],
+            "hvss_lvff_100C_1v65": ["basic"],
+            "hvss_lvff_100C_1v95": ["basic"],
+            "hvss_lvff_100C_1v95_lowhv1v65": ["basic"],
+            "hvss_lvff_100C_5v50_lowhv1v65_lv1v95": ["basic"],
+            "hvss_lvff_n40C_1v65": ["basic"],
+            "hvss_lvff_n40C_1v95": ["basic"],
+            "hvss_lvff_n40C_1v95_lowhv1v65": ["basic"],
+            "hvss_lvff_n40C_5v50_lowhv1v65_lv1v95": ["basic"],
+            "ss_100C_1v65": ["basic"],
+            "ss_100C_1v65_lv1v40": ["basic"],
+            "ss_100C_1v65_lv1v60": ["basic"],
+            "ss_100C_1v95": ["basic"],
+            "ss_100C_2v40_lowhv1v65_lv1v60": ["basic"],
+            "ss_100C_2v70_lowhv1v65_lv1v60": ["basic"],
+            "ss_100C_3v00": ["basic"],
+            "ss_100C_3v00_lowhv1v65_lv1v60": ["basic"],
+            "ss_100C_5v50_lowhv1v65_lv1v60": ["basic"],
+            "ss_150C_1v65": ["basic"],
+            "ss_150C_1v65_lv1v60": ["basic"],
+            "ss_150C_3v00_lowhv1v65_lv1v60": ["basic"],
+            "ss_n40C_1v32": ["basic"],
+            "ss_n40C_1v32_lv1v28": ["basic"],
+            "ss_n40C_1v49": ["basic"],
+            "ss_n40C_1v49_lv1v44": ["basic"],
+            "ss_n40C_1v65": ["basic", "ccsnoise"],
+            "ss_n40C_1v65_lv1v35": ["basic"],
+            "ss_n40C_1v65_lv1v40": ["basic"],
+            "ss_n40C_1v65_lv1v60": ["basic", "ccsnoise"],
+            "ss_n40C_1v95": ["basic"],
+            "ss_n40C_5v50_lowhv1v65_lv1v60": ["basic"],
+            "tt_025C_2v64_lv1v80": ["basic"],
+            "tt_025C_2v97_lv1v80": ["basic"],
+            "tt_025C_3v30": ["basic"],
+            "tt_025C_3v30_lv1v80": ["basic"],
+            "tt_100C_3v30": ["basic"],
+            "tt_100C_3v30_lv1v80": ["basic"],
+            "tt_150C_3v30_lv1v80": ["basic"],
+        },
+    },
+    "sky130_fd_sc_lp": {
+        "commit": "e2c1e0646999163d35ea7b2521c3ec5c28633e63",  # v0.0.2, 2020-12-04
+        "shallow_since": "1604476084 -0800",
+        "corners": {
+            "ff_100C_1v95": ["basic"],
+            "ff_125C_3v15": ["basic"],
+            "ff_140C_1v95": ["basic"],
+            "ff_150C_2v05": ["basic"],
+            "ff_n40C_1v56": ["basic"],
+            "ff_n40C_1v76": ["basic"],
+            "ff_n40C_1v95": ["basic"],
+            "ff_n40C_2v05": ["basic"],
+            "ss_100C_1v60": ["basic"],
+            "ss_140C_1v65": ["basic"],
+            "ss_150C_1v65": ["basic"],
+            "ss_n40C_1v55": ["basic"],
+            "ss_n40C_1v60": ["basic"],
+            "ss_n40C_1v65": ["basic"],
+        },
+    },
     "sky130_fd_sc_ls": {
-        "commit": "9f0322409f9edcb831d8ffcd409c699f377010ed",  # v0.0.2, 2020-09-01
-        "shallow_since": "1591047380 -0700",
+        "commit": "4f549e30dd91a1c264f8895e07b2872fe410a8c2",  # v0.1.1, 2020-12-04
+        "shallow_since": "1604476021 -0800",
         "corners": {
             "ff_085C_1v95": ["basic"],
             "ff_100C_1v65_dest1v76_destvpb1v76_ka1v76": ["basic"],
@@ -114,8 +197,8 @@ CELL_LIBRARIES = {
         },
     },
     "sky130_fd_sc_ms": {
-        "commit": "191a2bf03baf82d2dac0e4b35b631e7a319e7116",  # v0.1.1, 2020-09-01
-        "shallow_since": "1595647761 -0700",
+        "commit": "ae1b7f68821505cf2d93d9d44cce5ece22710fad",  # v0.0.2, 2020-12-04
+        "shallow_since": "1605631186 -0800",
         "corners": {
             "ff_085C_1v95": ["leakage"],
             "ff_100C_1v65": ["basic"],
