@@ -24,7 +24,7 @@ def initialize_external_repositories(python_interpreter = None, python_interpret
     initialize_pybind11()
     pip_install(
         name = "com_google_open_silicon_bazel_pip_deps",
-        requirements = "//dependency_support:pip_requirements.txt",
+        requirements = "@com_google_open_silicon_bazel//dependency_support:pip_requirements.txt",
         python_interpreter = python_interpreter,
         python_interpreter_target = python_interpreter_target
     )
