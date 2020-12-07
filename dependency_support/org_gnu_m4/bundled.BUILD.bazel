@@ -81,6 +81,7 @@ cc_binary(
             "lib/spawnattr_setsigmask.c",
             "lib/spawni.c",
             "lib/spawnp.c",
+            "lib/strndup.c",
             "lib/strchrnul.c",
             "lib/strerror-override.c",
             "lib/waitpid.c",
