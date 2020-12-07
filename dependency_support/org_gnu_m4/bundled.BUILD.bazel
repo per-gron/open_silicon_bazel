@@ -56,9 +56,11 @@ cc_binary(
         ["lib/*.c", "src/*.c"],
         exclude = HEADERS_WITH_C_EXTENSION + [
             "lib/asprintf.c",
+            "lib/getopt1.c",
             "lib/msvc-nothrow.c",
             "lib/fcntl.c",
             "lib/fflush.c",
+            "lib/fopen.c",
             "lib/fpending.c",
             "lib/frexpl.c",
             "lib/fseeko.c",
