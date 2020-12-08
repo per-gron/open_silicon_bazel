@@ -62,6 +62,7 @@ cc_binary(
             "lib/fflush.c",
             "lib/fopen.c",
             "lib/fpending.c",
+            "lib/freadahead.c",  # This file does some nasty hacks. A patch makes the rest of the code not use it.
             "lib/frexpl.c",
             "lib/fseeko.c",
             "lib/gettimeofday.c",
