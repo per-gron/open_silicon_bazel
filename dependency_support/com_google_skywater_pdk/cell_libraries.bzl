@@ -22,6 +22,14 @@ This is used by the Bazel rules to set up the proper workspaces and targets."""
 # This list is manually curated and needs to be updated when upgrading to newer
 # cell library versions.
 CELL_LIBRARIES = {
+    "sky130_fd_io": {
+        "commit": "7ec511f1a4689e174c63b3964d1ba8da9a3565e5",  # v0.2.1, 2020-12-09
+        "shallow_since": "1606239275 -0800",
+    },
+    "sky130_fd_pr": {
+        "commit": "f62031a1be9aefe902d6d54cddd6f59b57627436",  # v0.20.1, 2020-12-09
+        "shallow_since": "1605038979 -0800",
+    },
     "sky130_fd_sc_hd": {
         "commit": "ac7fb61f06e6470b94e8afdf7c25268f62fbd7b1",  # v0.0.2, 2020-12-04
         "shallow_since": "1605028103 -0800",

@@ -33,8 +33,10 @@ def declare_cell_library(library_name):
     """This should be called from the BUILD file of a cell library
     workspace. It sets up the targets for the generated files of
     the given library."""
+    native.exports_files(native.glob(["**/*"]))
     library = CELL_LIBRARIES[library_name]
-    for corner in library["corners"]:
+    corners = library.get("corners", {})
+    for corner in corners:
         corner_types = library["corners"][corner]
         for corner_type in corner_types:
             out_path = "timing/%s__%s%s.lib" % (library_name, corner, _FILE_SUFFIX_BY_CORNER_TYPE[corner_type])
@@ -55,5 +57,5 @@ def declare_cell_library(library_name):
     native.filegroup(
         name = "timing_all",
         visibility = ["//visibility:public"],
-        srcs = [":timing_%s_all" % corner for corner in library["corners"]],
+        srcs = [":timing_%s_all" % corner for corner in corners],
     )
