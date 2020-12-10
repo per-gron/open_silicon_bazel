@@ -34,6 +34,11 @@ def declare_cell_library(library_name):
     workspace. It sets up the targets for the generated files of
     the given library."""
     native.exports_files(native.glob(["**/*"]))
+    native.filegroup(
+        name = "spice_models",
+        srcs = native.glob(["**/*.spice"]),
+        visibility = ["//visibility:public"],
+    )
     library = CELL_LIBRARIES[library_name]
     corners = library.get("corners", {})
     for corner in corners:
